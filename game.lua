@@ -6,7 +6,7 @@ local MAP_HEIGHT = 8
 TILE_WIDTH = 128
 TILE_HEIGHT = 135
 
-Game.nbSpawn = 1
+Game.nbSpawn = 0
 Game.delaySpawn = 0
 
 Game.timerSpawn = nil
@@ -27,7 +27,6 @@ Game.Map = {
 Game.TileSheet = nil
 
 Game.TileTextures = {}
-Game.TileType = {}
 
 function Game.spawn()
     math.randomseed(os.time())
@@ -72,12 +71,7 @@ function Game.load()
         end
     end
 
-    Game.TileType[1] = "Left upper corner"
-    Game.TileType[2] = "Upper border"
-    Game.TileType[3] = "Right upper corner"
-    Game.TileType[8] = "Left border"
-    Game.TileType[9] = "Ground"
-    Game.TileType[10] = "Right border"
+    Game.nbSpawn = 0
 
     math.randomseed(os.time())
     Game.delaySpawn = math.random(0, 10)

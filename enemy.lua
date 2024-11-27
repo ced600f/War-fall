@@ -40,6 +40,7 @@ function newEnemy(x, y)
     enemy.free = false
     enemy.ratio = ennemiRatio
     enemy.points = 20
+    enemy.push = 150
 
     enemy.show = function(dt)
         if enemy.alpha < 1 then
@@ -231,6 +232,12 @@ function drawEnemies()
     end
 end
 
+function deleteAllEnemies()
+    for i = #enemies, 1, -1 do
+        table.remove(enemies, i)
+    end
+end
+
 function checkIntersection(bullet)
     if isIntersecting(tank.x, tank.y, tank.radius, bullet.x, bullet.y, bullet.radius) then
         tank.touched = true
@@ -247,6 +254,16 @@ function checkIntersection(bullet)
                 enemy.distanceBack = bullet.damage
                 bullet.free = true
                 enemy.etat = enemy.back
+            elseif enemy.alpha >= 1 and isIntersecting(enemy.x, enemy.y, enemy.radius, tank.x, tank.y, tank.radius) then
+                local angle = math.angle(tank.x, tank.y, enemy.x, enemy.y)
+                enemy.angleBack = angle
+                enemy.distanceBack = tank.push
+                enemy.etat = enemy.back
+
+                angle = angle + math.pi
+                tank.angleBack = angle
+                tank.distanceBack = enemy.push
+                tank.touched = true
             end
         end
     end

@@ -15,21 +15,26 @@ turretImages[1] = love.graphics.newImage("images/turret.png")
 turretImages[2] = love.graphics.newImage("images/turretHit.png")
 turretImages[3] = love.graphics.newImage("images/turretFalling.png")
 
-tank.x = SCREEN_WIDTH * 0.5 -- multiplication
-tank.y = SCREEN_HEIGHT * 0.5
-tank.tankImage = tankImage
-tank.turretImage = turretImage
-tank.angle = 0
-tank.rotationSpeed = 2
-tank.speed = 200
-tank.radius = 50
-tank.distanceBack = 0
-tank.angleBack = 0
-tank.turretAngle = 0
-tank.touched = false
-tank.falling = false
-tank.ratio = 1
-tank.points = 0
+tank.init = function()
+    tank.x = SCREEN_WIDTH * 0.5 -- multiplication
+    tank.y = SCREEN_HEIGHT * 0.5
+    tank.tankImage = tankImage
+    tank.turretImage = turretImage
+    tank.angle = 0
+    tank.rotationSpeed = 2
+    tank.speed = 200
+    tank.radius = 50
+    tank.distanceBack = 0
+    tank.angleBack = 0
+    tank.turretAngle = 0
+    tank.touched = false
+    tank.falling = false
+    tank.ratio = 1
+    tank.points = 0
+    tank.push = 600
+end
+
+tank.init()
 
 tank.shootTick = function()
 end
@@ -39,6 +44,8 @@ tank.fall = function(dt)
     tank.ratio = tank.ratio - 0.4 * dt
     if tank.ratio <= 0 then
         tank.ratio = 0
+        deleteAllEnemies()
+        tank.init()
         changeScene("GameOver")
     end
 end
