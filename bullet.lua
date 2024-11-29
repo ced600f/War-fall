@@ -27,6 +27,7 @@ function newBullet()
         checkIntersection(b)
 
         if b.free == false then
+            checkRebound(b)
             b.x = b.x + b.vx * dt
             b.y = b.y + b.vy * dt
 

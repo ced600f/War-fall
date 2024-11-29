@@ -8,6 +8,8 @@ require("sceneGameOver")
 require("utils")
 require("timer")
 
+math.randomseed(os.time())
+
 function love.load()
     love.window.setTitle("War Fall")
     local cursor = love.mouse.newCursor("images/cross.png", 0, 0)

@@ -248,22 +248,27 @@ function checkIntersection(bullet)
     else
         for i = 1, #enemies do
             local enemy = enemies[i]
-            if enemy.alpha >= 1 and isIntersecting(enemy.x, enemy.y, enemy.radius, bullet.x, bullet.y, bullet.radius) then
-                local angle = math.angle(bullet.x, bullet.y, enemy.x, enemy.y)
-                enemy.angleBack = angle
-                enemy.distanceBack = bullet.damage
-                bullet.free = true
-                enemy.etat = enemy.back
-            elseif enemy.alpha >= 1 and isIntersecting(enemy.x, enemy.y, enemy.radius, tank.x, tank.y, tank.radius) then
-                local angle = math.angle(tank.x, tank.y, enemy.x, enemy.y)
-                enemy.angleBack = angle
-                enemy.distanceBack = tank.push
-                enemy.etat = enemy.back
+            if enemy.etat ~= enemy.fall then
+                if
+                    enemy.alpha >= 1 and
+                        isIntersecting(enemy.x, enemy.y, enemy.radius, bullet.x, bullet.y, bullet.radius)
+                 then
+                    local angle = math.angle(bullet.x, bullet.y, enemy.x, enemy.y)
+                    enemy.angleBack = angle
+                    enemy.distanceBack = bullet.damage
+                    bullet.free = true
+                    enemy.etat = enemy.back
+                elseif enemy.alpha >= 1 and isIntersecting(enemy.x, enemy.y, enemy.radius, tank.x, tank.y, tank.radius) then
+                    local angle = math.angle(tank.x, tank.y, enemy.x, enemy.y)
+                    enemy.angleBack = angle
+                    enemy.distanceBack = tank.push
+                    enemy.etat = enemy.back
 
-                angle = angle + math.pi
-                tank.angleBack = angle
-                tank.distanceBack = enemy.push
-                tank.touched = true
+                    angle = angle + math.pi
+                    tank.angleBack = angle
+                    tank.distanceBack = enemy.push
+                    tank.touched = true
+                end
             end
         end
     end
