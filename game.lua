@@ -1,4 +1,5 @@
 require("objects")
+require("coin")
 local tank = require("tank")
 local Game = {}
 local MAP_WIDTH = 15
@@ -7,10 +8,10 @@ TILE_WIDTH = 128
 TILE_HEIGHT = 135
 
 Game.nbSpawn = 0
-Game.delaySpawn = 0
 
 Game.timerSpawn = nil
 Game.timerNBSpawn = nil
+Game.timerCoin = nil
 
 Game.Map = {}
 Game.Map = {
@@ -29,20 +30,23 @@ Game.TileSheet = nil
 Game.TileTextures = {}
 
 function Game.spawn()
-    math.randomseed(os.time())
     for i = 1, Game.nbSpawn do
         spawnEnemy()
     end
-    Game.delaySpawn = math.random(2, 10)
-    Game.timerSpawn = newTimer(Game.delaySpawn, Game.spawn)
+    Game.timerSpawn = newTimer(math.random(2, 10), Game.spawn)
     Game.timerSpawn.start()
 end
 
 function Game.addSpawn()
-    math.randomseed(os.time())
     Game.nbSpawn = Game.nbSpawn + 1
     Game.timerNBSpawn = newTimer(math.random(10, 20), Game.addSpawn)
     Game.timerNBSpawn.start()
+end
+
+function Game.addCoin()
+    newCoin()
+    Game.timerCoin = newTimer(math.random(10, 20), Game.addCoin)
+    Game.timerCoin.start()
 end
 
 function Game.load()
@@ -75,20 +79,25 @@ function Game.load()
     Game.nbSpawn = 0
 
     math.randomseed(os.time())
-    Game.delaySpawn = math.random(0, 10)
-    Game.timerSpawn = newTimer(Game.delaySpawn, Game.spawn)
+    Game.timerSpawn = newTimer(math.random(0, 10), Game.spawn)
     Game.timerSpawn.start()
     Game.timerNBSpawn = newTimer(math.random(10, 20), Game.addSpawn)
     Game.timerNBSpawn.start()
+    Game.timerCoin = newTimer(math.random(1, 5), Game.addCoin)
+    Game.timerCoin.start()
 end
 
 function Game.update(dt)
     Game.timerSpawn.update(dt)
     Game.timerNBSpawn.update(dt)
+    Game.timerCoin.update(dt)
+
     tank.update(dt)
 
     updateEnemies(dt)
     updateBullets(dt)
+    updateObjects(dt)
+    updateCoins(dt)
 end
 
 function Game.draw()
@@ -105,12 +114,9 @@ function Game.draw()
     end
 
     drawObjects()
-    love.graphics.print(Game.timerSpawn.delay .. " - " .. Game.timerSpawn.currentTime, 10, 10)
-    love.graphics.print(
-        Game.nbSpawn .. " - " .. Game.timerNBSpawn.delay .. " - " .. Game.timerNBSpawn.currentTime,
-        10,
-        40
-    )
+    drawCoins()
+
+    love.graphics.print(Game.timerCoin.delay .. " - " .. Game.timerCoin.currentTime, 10, 10)
 end
 
 function GetTile(x, y)

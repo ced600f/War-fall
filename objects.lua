@@ -6,39 +6,55 @@ for i = 1, 15 do
     objectsAvailables[i] = love.graphics.newImage("Images/Tiles/Object_" .. i .. ".png")
 end
 
+function createObject()
+    local object = {}
+
+    object.x = math.random(margin, SCREEN_WIDTH - margin)
+    object.y = math.random(margin, SCREEN_HEIGHT - margin)
+    object.life = 15
+    local rand = math.random(1, #objectsAvailables)
+    object.image = objectsAvailables[rand]
+    object.imageWidth = object.image:getWidth()
+    object.imageHeight = object.image:getHeight()
+
+    object.rebound = false
+    object.offsetX = object.x - object.imageWidth / 2
+    object.offsetY = object.y - object.imageHeight / 2
+    object.offsetX2 = object.offsetX + object.imageWidth
+    object.offsetY2 = object.offsetY + object.imageHeight
+
+    if rand == 3 or rand == 4 or rand == 7 then
+        object.rebound = true
+    end
+
+    object.draw = function()
+        love.graphics.draw(object.image, object.x, object.y, 0, 1, 1, object.imageWidth / 2, object.imageHeight / 2)
+        love.graphics.rectangle("line", object.offsetX, object.offsetY, object.imageWidth, object.imageHeight)
+        love.graphics.print(tostring(object.life), object.x, object.y)
+    end
+
+    return object
+end
+
 function initObjects()
     for i = #objects, 1, -1 do
         table.remove(objects, i)
     end
 
     for i = 1, 15 do
-        local object = {}
-
-        object.x = math.random(margin, SCREEN_WIDTH - margin)
-        object.y = math.random(margin, SCREEN_HEIGHT - margin)
-
-        local rand = math.random(1, #objectsAvailables)
-        object.image = objectsAvailables[rand]
-        object.imageWidth = object.image:getWidth()
-        object.imageHeight = object.image:getHeight()
-
-        object.rebound = false
-        object.offsetX = object.x - object.imageWidth / 2
-        object.offsetY = object.y - object.imageHeight / 2
-        object.offsetX2 = object.offsetX + object.imageWidth
-        object.offsetY2 = object.offsetY + object.imageHeight
-
-        if rand == 3 or rand == 4 or rand == 7 then
-            object.rebound = true
+        local object = createObject()
+        while checkObjectCollision(object) do
+            object = createObject()
         end
-
-        object.draw = function()
-            love.graphics.draw(object.image, object.x, object.y, 0, 1, 1, object.imageWidth / 2, object.imageHeight / 2)
-            love.graphics.rectangle("line", object.offsetX, object.offsetY, object.imageWidth, object.imageHeight)
-            love.graphics.print(tostring(object.rebound), object.x, object.y)
-        end
-
         table.insert(objects, object)
+    end
+end
+
+function updateObjects(dt)
+    for i = #objects, 1, -1 do
+        if objects[i].life == 0 then
+            table.remove(objects, i)
+        end
     end
 end
 
@@ -69,7 +85,27 @@ function checkRebound(bullet)
                     bullet.vx = bullet.vx * -1
                     bullet.vy = bullet.vy * -1
                 end
+
+                object.life = object.life - 1
             end
         end
     end
+end
+
+function checkVehicleCollision(vehicle)
+    local collision = false
+
+    return collision
+end
+
+function checkObjectCollision(newObjectund)
+    local collision = false
+
+    for _, object in ipairs(objects) do
+        if collide(object, newObject) then
+            collision = true
+        end
+    end
+
+    return collision
 end

@@ -18,6 +18,7 @@ turretImages[3] = love.graphics.newImage("images/turretFalling.png")
 tank.init = function()
     tank.x = SCREEN_WIDTH * 0.5 -- multiplication
     tank.y = SCREEN_HEIGHT * 0.5
+    tank.image = tankImage
     tank.tankImage = tankImage
     tank.turretImage = turretImage
     tank.angle = 0
@@ -98,12 +99,20 @@ tank.update = function(dt)
         tank.angle = tank.angle + tank.rotationSpeed * dt
     end
 
+    local x = tank.x
+    local y = tank.y
+
     if love.keyboard.isDown("up") then
         tank.x = tank.x + math.cos(tank.angle) * tank.speed * dt
         tank.y = tank.y + math.sin(tank.angle) * tank.speed * dt
     elseif love.keyboard.isDown("down") then
         tank.x = tank.x - math.cos(tank.angle) * tank.speed * dt
         tank.y = tank.y - math.sin(tank.angle) * tank.speed * dt
+    end
+
+    if checkObjectCollision(tank, true) then
+    --tank.x = x
+    --tank.y = y
     end
 
     if GetTile(tank.x, tank.y) == 0 or tank.x <= 0 or tank.x >= SCREEN_WIDTH or tank.y <= 0 or tank.y >= SCREEN_HEIGHT then
