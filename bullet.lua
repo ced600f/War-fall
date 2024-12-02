@@ -15,12 +15,13 @@ function newBullet()
     b.radius = 5
     b.free = false
     b.type = 0
-
+    b.sound = love.audio.newSource("Sons/bullet.wav", "static")
     b.fire = function(x, y, angle)
         b.x = x
         b.y = y
         b.vx = math.cos(angle) * b.speed
         b.vy = math.sin(angle) * b.speed
+        b.sound:play()
     end
 
     b.update = function(dt)

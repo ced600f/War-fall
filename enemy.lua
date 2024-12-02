@@ -4,7 +4,7 @@ local ennemiRatio = 0.60
 local Image
 local Images = {}
 local barrelLength = 55
-
+local rotationSpeed = 2
 Images[1] = love.graphics.newImage("images/ennemi-idle.png")
 Images[2] = love.graphics.newImage("images/ennemi-patrol.png")
 Images[3] = love.graphics.newImage("images/ennemi-touched.png")
@@ -41,6 +41,8 @@ function newEnemy(x, y)
     enemy.ratio = ennemiRatio
     enemy.points = 20
     enemy.push = 150
+    enemy.hurtSound = love.audio.newSource("Sons/EnemyHurt.wav", "static")
+    enemy.FallingSound = love.audio.newSource("Sons/EnemyFalling.wav", "static")
 
     enemy.show = function(dt)
         if enemy.alpha < 1 then
@@ -107,6 +109,7 @@ function newEnemy(x, y)
         local vx = enemy.speed * math.cos(enemy.angle) * dt
         local vy = enemy.speed * math.sin(enemy.angle) * dt
         ---------------------------------------
+
         enemy.x = enemy.x + vx
         enemy.y = enemy.y + vy
         enemy.distance = enemy.distance - dt
@@ -134,13 +137,24 @@ function newEnemy(x, y)
             enemy.y = SCREEN_HEIGHT - TILE_HEIGHT / 2
             enemy.checkDistance()
         end
+        -- L'ennemi s'est déplacé à l'extérieur de la carte, on ne le laisse pas tomber
         if GetTile(enemy.x, enemy.y) == 0 then
+            enemy.x = enemy.x - vx
+            enemy.y = enemy.y - vy
+            enemy.checkDistance()
+        end
+
+        -- Test si on colisionne avec un objet
+        if checkVehicleCollision(enemy) then
             enemy.x = enemy.x - vx
             enemy.y = enemy.y - vy
             enemy.checkDistance()
         end
     end
 
+    -- On ne passe pas directement au changement de direction
+    -- Cela faisait des effets non désirés (liés probablement au timer)
+    -- On laisse l'ennemi "avancer" sur place 1/2 s avant changement de direction
     enemy.checkDistance = function()
         if enemy.distance > 0.5 then
             enemy.distance = 0.5
@@ -149,12 +163,13 @@ function newEnemy(x, y)
 
     enemy.back = function(dt)
         -- Conserver cette formule-------------
-        local vx = enemy.speed * 2 * math.cos(enemy.angleBack) * dt
-        local vy = enemy.speed * 2 * math.sin(enemy.angleBack) * dt
+        rotationSpeed = 6
+        local vx = enemy.speed * rotationSpeed * math.cos(enemy.angleBack) * dt
+        local vy = enemy.speed * rotationSpeed * math.sin(enemy.angleBack) * dt
         local dist = math.dist(enemy.x, enemy.y, vx, vy) * dt
         enemy.x = enemy.x + vx
         enemy.y = enemy.y + vy
-
+        enemy.angleCible = enemy.angleCible + math.random(-math.pi / 2, math.pi / 2)
         enemy.image = Images[3]
 
         if
@@ -163,19 +178,25 @@ function newEnemy(x, y)
          then
             enemy.etat = enemy.fall
             tank.points = tank.points + enemy.points
+            enemy.FallingSound:play()
+        elseif checkVehicleCollision(enemy) then
+            enemy.x = enemy.x - vx
+            enemy.y = enemy.y - vy
+            enemy.etat = enemy.changeDirection
         else
             enemy.distanceBack = enemy.distanceBack - math.floor(dist)
             if enemy.distanceBack <= 0 then
                 enemy.etat = enemy.changeDirection
+                rotationSpeed = 2
             end
         end
     end
 
     enemy.update = function(dt)
         if enemy.angle < enemy.angleCible then
-            enemy.angle = enemy.angle + 2 * dt
+            enemy.angle = enemy.angle + rotationSpeed * dt
         elseif enemy.angle > enemy.angleCible then
-            enemy.angle = enemy.angle - 2 * dt
+            enemy.angle = enemy.angle - rotationSpeed * dt
         end
         enemy.shootTimer = enemy.shootTimer + dt
         enemy.etat(dt)
@@ -194,7 +215,7 @@ function newEnemy(x, y)
             offsetY
         )
         love.graphics.setColor(1, 1, 1, 1)
-        love.graphics.circle("line", enemy.x, enemy.y, enemy.radius)
+        --love.graphics.circle("line", enemy.x, enemy.y, enemy.radius)
     end
 
     table.insert(enemies, enemy)
@@ -245,6 +266,8 @@ function checkIntersection(bullet)
         tank.angleBack = angle
         tank.distanceBack = bullet.damage
         bullet.free = true
+        tank.hurtSound:stop()
+        tank.hurtSound:play()
     else
         for i = 1, #enemies do
             local enemy = enemies[i]
@@ -258,11 +281,13 @@ function checkIntersection(bullet)
                     enemy.distanceBack = bullet.damage
                     bullet.free = true
                     enemy.etat = enemy.back
+                    enemy.hurtSound:play()
                 elseif enemy.alpha >= 1 and isIntersecting(enemy.x, enemy.y, enemy.radius, tank.x, tank.y, tank.radius) then
                     local angle = math.angle(tank.x, tank.y, enemy.x, enemy.y)
                     enemy.angleBack = angle
                     enemy.distanceBack = tank.push
                     enemy.etat = enemy.back
+                    enemy.hurtSound:play()
 
                     angle = angle + math.pi
                     tank.angleBack = angle

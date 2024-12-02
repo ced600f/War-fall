@@ -16,6 +16,8 @@ function createCoin()
     object.image = coinsImages[rand]
     object.imageWidth = object.image:getWidth()
     object.imageHeight = object.image:getHeight()
+    object.radius = object.imageHeight
+    object.sound = love.audio.newSource("Sons/Coin.wav", "static")
 
     object.value = 10
     object.offsetX = object.x - object.imageWidth / 2
@@ -29,8 +31,8 @@ function createCoin()
 
     object.draw = function()
         love.graphics.draw(object.image, object.x, object.y, 0, 1, 1, object.imageWidth / 2, object.imageHeight / 2)
-        love.graphics.rectangle("line", object.offsetX, object.offsetY, object.imageWidth, object.imageHeight)
-        love.graphics.print(tostring(object.value), object.x, object.y)
+        --love.graphics.rectangle("line", object.offsetX, object.offsetY, object.imageWidth, object.imageHeight)
+        --love.graphics.print(tostring(object.value), object.x, object.y)
     end
 
     return object
@@ -61,5 +63,15 @@ end
 function initCoins()
     for i = #coins, 1, -1 do
         table.remove(coins, i)
+    end
+end
+
+function checkCoinCollision(tank)
+    for _, object in ipairs(coins) do
+        if isIntersecting(object.x, object.y, object.radius, tank.x, tank.y, tank.radius) then
+            tank.points = tank.points + object.value
+            object.value = 0
+            object.sound:play()
+        end
     end
 end

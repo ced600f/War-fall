@@ -1,6 +1,6 @@
 local objects = {}
 local objectsAvailables = {}
-local margin = 180
+MARGIN = 180
 
 for i = 1, 15 do
     objectsAvailables[i] = love.graphics.newImage("Images/Tiles/Object_" .. i .. ".png")
@@ -9,8 +9,8 @@ end
 function createObject()
     local object = {}
 
-    object.x = math.random(margin, SCREEN_WIDTH - margin)
-    object.y = math.random(margin, SCREEN_HEIGHT - margin)
+    object.x = math.random(MARGIN, SCREEN_WIDTH - MARGIN)
+    object.y = math.random(MARGIN, SCREEN_HEIGHT - MARGIN)
     object.life = 15
     local rand = math.random(1, #objectsAvailables)
     object.image = objectsAvailables[rand]
@@ -22,15 +22,19 @@ function createObject()
     object.offsetY = object.y - object.imageHeight / 2
     object.offsetX2 = object.offsetX + object.imageWidth
     object.offsetY2 = object.offsetY + object.imageHeight
-
+    object.radius = object.imageWidth / 2
+    if object.imageHeight / 2 > object.radius then
+        object.radius = object.imageHeight / 2
+    end
     if rand == 3 or rand == 4 or rand == 7 then
         object.rebound = true
     end
 
     object.draw = function()
         love.graphics.draw(object.image, object.x, object.y, 0, 1, 1, object.imageWidth / 2, object.imageHeight / 2)
-        love.graphics.rectangle("line", object.offsetX, object.offsetY, object.imageWidth, object.imageHeight)
-        love.graphics.print(tostring(object.life), object.x, object.y)
+        --love.graphics.rectangle("line", object.offsetX, object.offsetY, object.imageWidth, object.imageHeight)
+        --love.graphics.circle("line", object.x, object.y, object.radius)
+        --love.graphics.print(tostring(object.life), object.x, object.y)
     end
 
     return object
@@ -95,10 +99,18 @@ end
 function checkVehicleCollision(vehicle)
     local collision = false
 
+    for _, object in ipairs(objects) do
+        if object.rebound == true then
+            if isIntersecting(object.x, object.y, object.radius, vehicle.x, vehicle.y, vehicle.radius) then
+                collision = true
+            end
+        end
+    end
+
     return collision
 end
 
-function checkObjectCollision(newObjectund)
+function checkObjectCollision(newObject)
     local collision = false
 
     for _, object in ipairs(objects) do

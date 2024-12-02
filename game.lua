@@ -1,4 +1,5 @@
 require("objects")
+require("timer")
 require("coin")
 local tank = require("tank")
 local Game = {}
@@ -8,10 +9,6 @@ TILE_WIDTH = 128
 TILE_HEIGHT = 135
 
 Game.nbSpawn = 0
-
-Game.timerSpawn = nil
-Game.timerNBSpawn = nil
-Game.timerCoin = nil
 
 Game.Map = {}
 Game.Map = {
@@ -33,20 +30,14 @@ function Game.spawn()
     for i = 1, Game.nbSpawn do
         spawnEnemy()
     end
-    Game.timerSpawn = newTimer(math.random(2, 10), Game.spawn)
-    Game.timerSpawn.start()
 end
 
 function Game.addSpawn()
     Game.nbSpawn = Game.nbSpawn + 1
-    Game.timerNBSpawn = newTimer(math.random(10, 20), Game.addSpawn)
-    Game.timerNBSpawn.start()
 end
 
 function Game.addCoin()
     newCoin()
-    Game.timerCoin = newTimer(math.random(10, 20), Game.addCoin)
-    Game.timerCoin.start()
 end
 
 function Game.load()
@@ -54,6 +45,8 @@ function Game.load()
     Game.TileSheet = love.graphics.newImage("images/tiles/tiles.png")
     local nCols = Game.TileSheet:getWidth() / TILE_WIDTH
     local nLines = Game.TileSheet:getHeight() / TILE_HEIGHT
+    Game.Music = love.audio.newSource("Sons/Instrumental.mp3", "stream")
+    Game.Music:setVolume(0.7)
 
     local l, c
     local id = 1
@@ -76,21 +69,23 @@ function Game.load()
         end
     end
 
-    Game.nbSpawn = 0
+    -- Si le tank colisionne avec un objet dès le début
+    -- On le déplace aléatoirement
+    while checkVehicleCollision(tank) do
+        tank.x = math.random(MARGIN, SCREEN_WIDTH - MARGIN)
+        tank.y = math.random(MARGIN, SCREEN_HEIGHT - MARGIN)
+    end
 
-    math.randomseed(os.time())
-    Game.timerSpawn = newTimer(math.random(0, 10), Game.spawn)
-    Game.timerSpawn.start()
-    Game.timerNBSpawn = newTimer(math.random(10, 20), Game.addSpawn)
-    Game.timerNBSpawn.start()
-    Game.timerCoin = newTimer(math.random(1, 5), Game.addCoin)
-    Game.timerCoin.start()
+    Game.nbSpawn = 1
+    newTimer(5, 20, Game.spawn)
+    newTimer(15, 30, Game.addSpawn)
+    newTimer(7, 15, Game.addCoin)
+    Game.Music:stop()
+    Game.Music:play()
 end
 
 function Game.update(dt)
-    Game.timerSpawn.update(dt)
-    Game.timerNBSpawn.update(dt)
-    Game.timerCoin.update(dt)
+    updateTimers(dt)
 
     tank.update(dt)
 
@@ -115,8 +110,6 @@ function Game.draw()
 
     drawObjects()
     drawCoins()
-
-    love.graphics.print(Game.timerCoin.delay .. " - " .. Game.timerCoin.currentTime, 10, 10)
 end
 
 function GetTile(x, y)

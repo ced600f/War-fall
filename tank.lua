@@ -9,6 +9,7 @@ local offsetY = imageHeight / 2
 local tank = {}
 local oldMouseButtonState = false
 local barrelLength = 65
+local DEFAULTDAMAGE = 600
 local angleCorrection = math.pi * 0.5
 local turretImages = {}
 turretImages[1] = love.graphics.newImage("images/turret.png")
@@ -32,7 +33,9 @@ tank.init = function()
     tank.falling = false
     tank.ratio = 1
     tank.points = 0
-    tank.push = 600
+    tank.push = 800
+    tank.hurtSound = love.audio.newSource("Sons/TankHurt.wav", "static")
+    tank.fallingSound = love.audio.newSource("Sons/TankFalling.wav", "static")
 end
 
 tank.init()
@@ -51,7 +54,7 @@ tank.fall = function(dt)
     end
 end
 
-tank.shootTimer = newTimer(0.3, tank.shootTick)
+tank.shootTimer = newTimer(0.3, 0.3, tank.shootTick, false)
 
 tank.back = function(dt)
     -- Conserver cette formule-------------
@@ -86,7 +89,7 @@ tank.update = function(dt)
     local angle = math.atan2(mouseY - tank.y, mouseX - tank.x)
     tank.turretAngle = angle
     tank.turretImage = turretImage
-    tank.shootTimer.update(dt)
+    --tank.shootTimer.update(dt)
     if love.mouse.isDown(1) and oldMouseButtonState == false then
         tank.shoot(love.mouse.getPosition())
     end
@@ -110,13 +113,17 @@ tank.update = function(dt)
         tank.y = tank.y - math.sin(tank.angle) * tank.speed * dt
     end
 
-    if checkObjectCollision(tank, true) then
-    --tank.x = x
-    --tank.y = y
+    if checkVehicleCollision(tank) then
+        tank.x = x
+        tank.y = y
     end
+
+    checkCoinCollision(tank)
 
     if GetTile(tank.x, tank.y) == 0 or tank.x <= 0 or tank.x >= SCREEN_WIDTH or tank.y <= 0 or tank.y >= SCREEN_HEIGHT then
         tank.falling = true
+        tank.fallingSound:stop()
+        tank.fallingSound:play()
     end
 end
 
@@ -126,7 +133,7 @@ tank.shoot = function(x, y)
         local b = newBullet()
         local x = barrelLength * math.cos(tank.turretAngle)
         local y = barrelLength * math.sin(tank.turretAngle)
-        b.damage = b.damage * 2
+        b.damage = DEFAULTDAMAGE
         b.fire(tank.x + x, tank.y + y, tank.turretAngle)
     end
 end
@@ -152,9 +159,9 @@ tank.draw = function()
         offsetX,
         offsetY
     )
-    love.graphics.circle("line", tank.x, tank.y, tank.radius)
+    --love.graphics.circle("line", tank.x, tank.y, tank.radius)
     love.graphics.print("Points : " .. tostring(tank.points), 10, 50)
-    love.graphics.print("x/y : " .. tostring(tank.x) .. "/" .. tank.y, 10, 80)
+    --love.graphics.print("Shoot : " .. tostring(tank.shootTimer.restart) .. " - " .. tank.shootTimer.currentTime, 10, 80)
 end
 
 return tank
