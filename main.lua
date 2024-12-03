@@ -1,5 +1,6 @@
 love.window.setMode(1920, 1080, {resizable = true, vsync = false, msaa = 4, centered = true})
 SCREEN_WIDTH, SCREEN_HEIGHT = love.graphics.getDimensions()
+love.graphics.setFont(love.graphics.newFont(16))
 
 require("sceneManager")
 require("sceneGame")

@@ -1,6 +1,8 @@
 require("objects")
 require("timer")
 require("coin")
+require("bonus")
+
 local tank = require("tank")
 local Game = {}
 local MAP_WIDTH = 15
@@ -40,8 +42,14 @@ function Game.addCoin()
     newCoin()
 end
 
+function Game.addBonus()
+    newBonus()
+end
+
 function Game.load()
     initObjects()
+    initBonus()
+
     Game.TileSheet = love.graphics.newImage("images/tiles/tiles.png")
     local nCols = Game.TileSheet:getWidth() / TILE_WIDTH
     local nLines = Game.TileSheet:getHeight() / TILE_HEIGHT
@@ -80,6 +88,7 @@ function Game.load()
     newTimer(5, 20, Game.spawn)
     newTimer(15, 30, Game.addSpawn)
     newTimer(7, 15, Game.addCoin)
+    newTimer(15, 60, Game.addBonus)
     Game.Music:stop()
     Game.Music:play()
 end
@@ -110,6 +119,7 @@ function Game.draw()
 
     drawObjects()
     drawCoins()
+    drawBonus()
 end
 
 function GetTile(x, y)

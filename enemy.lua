@@ -265,6 +265,9 @@ function checkIntersection(bullet)
         local angle = math.angle(bullet.x, bullet.y, tank.x, tank.y)
         tank.angleBack = angle
         tank.distanceBack = bullet.damage
+        if tank.isBonusPresent(BONUS_SHIELD) then
+            tank.distanceBack = tank.distanceBack / 3
+        end
         bullet.free = true
         tank.hurtSound:stop()
         tank.hurtSound:play()
