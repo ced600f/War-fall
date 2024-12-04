@@ -23,6 +23,9 @@ function newScene(title)
     scene.mousepressed = function(x, y, button)
     end
 
+    scene.gamepadpressed = function(joystick, button)
+    end
+
     scenes[title] = scene
 
     return scene
@@ -54,4 +57,8 @@ end
 
 function mousepressed(x, y, button)
     currentScene.mousepressed(x, y, button)
+end
+
+function gamepadpressed(joystick, button)
+    currentScene.gamepadpressed(joystick, button)
 end

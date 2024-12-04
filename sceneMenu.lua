@@ -21,3 +21,7 @@ sceneMenu.keypressed = function(key)
         changeScene("Game", "")
     end
 end
+
+sceneMenu.gamepadpressed = function(joystick, button)
+    changeScene("Game", "")
+end

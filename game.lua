@@ -50,6 +50,8 @@ function Game.load()
     initObjects()
     initBonus()
 
+    tank.init()
+
     Game.TileSheet = love.graphics.newImage("images/tiles/tiles.png")
     local nCols = Game.TileSheet:getWidth() / TILE_WIDTH
     local nLines = Game.TileSheet:getHeight() / TILE_HEIGHT

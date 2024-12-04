@@ -7,7 +7,7 @@ BONUS_POWER = 2
 BONUS_SHIELD = 3
 BONUS_MINE = 4
 
-for i = 1, 4 do
+for i = 1, 3 do
     bonusImages[i] = love.graphics.newImage("Images/Bonus/Bonus" .. i .. ".png")
 end
 

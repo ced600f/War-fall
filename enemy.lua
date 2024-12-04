@@ -87,8 +87,12 @@ function newEnemy(x, y)
         enemy.etat = enemy.avance
         --enemy.distance = 0.5
         enemy.image = Images[5]
-        enemy.shoot(tank.x, tank.y)
-        enemy.avance(dt)
+        if tank.falling == false then
+            enemy.shoot(tank.x, tank.y)
+            enemy.avance(dt)
+        else
+            enemy.etat = enemy.changeDirection
+        end
     end
 
     enemy.changeDirection = function(dt)
@@ -114,7 +118,7 @@ function newEnemy(x, y)
         enemy.y = enemy.y + vy
         enemy.distance = enemy.distance - dt
         local dist = math.dist(enemy.x, enemy.y, tank.x, tank.y)
-        if dist <= enemy.rayonChase then
+        if dist <= enemy.rayonChase and tank.falling == false then
             enemy.etat = enemy.hunt
         elseif enemy.distance <= 0 then
             enemy.etat = enemy.changeDirection
@@ -247,7 +251,6 @@ function updateEnemies(dt)
 end
 
 function drawEnemies()
-    love.graphics.print("NB enemies : " .. #enemies, 10, 150)
     for _, enemy in ipairs(enemies) do
         enemy.draw()
     end

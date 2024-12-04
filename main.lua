@@ -33,3 +33,7 @@ end
 function love.mousepressed(x, y, button)
     mousepressed(x, y, button)
 end
+
+function love.gamepadpressed(joystick, button)
+    gamepadpressed(joystick, button)
+end

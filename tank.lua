@@ -1,5 +1,4 @@
 require("timer")
-
 local tankImage = love.graphics.newImage("images/base.png")
 local turretImage = love.graphics.newImage("images/turret.png")
 local imageWidth = tankImage:getWidth()
@@ -13,6 +12,8 @@ local DEFAULT_DAMAGE = 600
 local angleCorrection = math.pi * 0.5
 local turretImages = {}
 local BONUS_DURATION = 30
+local joysticks = love.joystick.getJoysticks()
+local gamepad = joysticks[1]
 
 turretImages[1] = love.graphics.newImage("images/turret.png")
 turretImages[2] = love.graphics.newImage("images/turretHit.png")
@@ -43,8 +44,6 @@ tank.init = function()
     tank.hurtSound = love.audio.newSource("Sons/TankHurt.wav", "static")
     tank.fallingSound = love.audio.newSource("Sons/TankFalling.wav", "static")
 end
-
-tank.init()
 
 tank.shootTick = function()
 end
@@ -78,7 +77,6 @@ tank.fall = function(dt)
     if tank.ratio <= 0 then
         tank.ratio = 0
         deleteAllEnemies()
-        tank.init()
         changeScene("GameOver")
     end
 end
@@ -109,6 +107,8 @@ tank.back = function(dt)
     if GetTile(tank.x, tank.y) == 0 or tank.x <= 0 or tank.x >= SCREEN_WIDTH or tank.y <= 0 or tank.y >= SCREEN_HEIGHT then
         tank.falling = true
         tank.touched = false
+        tank.fallingSound:stop()
+        tank.fallingSound:play()
     else
         tank.distanceBack = tank.distanceBack - math.floor(dist)
         if tank.distanceBack <= 0 then
@@ -133,7 +133,7 @@ tank.update = function(dt)
     tank.turretAngle = angle
     tank.turretImage = turretImage
     if love.mouse.isDown(1) and oldMouseButtonState == false then
-        tank.shoot(love.mouse.getPosition())
+        tank.shoot()
     end
 
     oldMouseButtonState = love.mouse.isDown(1)
@@ -153,6 +153,36 @@ tank.update = function(dt)
     elseif love.keyboard.isDown("down") then
         tank.x = tank.x - math.cos(tank.angle) * tank.speed * dt
         tank.y = tank.y - math.sin(tank.angle) * tank.speed * dt
+    end
+
+    -- Gestion du gamepad
+    if gamepad then
+        -- Turret
+        local gx = gamepad:getGamepadAxis("rightx")
+        local gy = gamepad:getGamepadAxis("righty")
+        tank.turretAngle = math.atan2(gy, gx)
+
+        -- Tank
+        local leftx = gamepad:getGamepadAxis("leftx")
+        local lefty = gamepad:getGamepadAxis("lefty")
+        if leftx <= -0.5 then
+            tank.angle = tank.angle - tank.rotationSpeed * dt
+        elseif leftx >= 0.5 then
+            tank.angle = tank.angle + tank.rotationSpeed * dt
+        end
+
+        if lefty <= -0.5 then
+            tank.x = tank.x + math.cos(tank.angle) * tank.speed * dt
+            tank.y = tank.y + math.sin(tank.angle) * tank.speed * dt
+        elseif lefty >= 0.5 then
+            tank.x = tank.x - math.cos(tank.angle) * tank.speed * dt
+            tank.y = tank.y - math.sin(tank.angle) * tank.speed * dt
+        end
+
+        -- Gachette ?
+        if gamepad:isGamepadDown("rightshoulder") or gamepad:getGamepadAxis("triggerright") >= 0.5 then
+            tank.shoot()
+        end
     end
 
     if checkVehicleCollision(tank) then
@@ -183,7 +213,7 @@ tank.createBullet = function(turretAngle, correction)
     b.fire(tank.x + x, tank.y + y, turretAngle + correction)
 end
 
-tank.shoot = function(x, y)
+tank.shoot = function()
     if tank.shootTimer.started == false then
         tank.shootTimer.start()
 
@@ -230,11 +260,8 @@ tank.draw = function()
             offsetY
         )
     end
-    --love.graphics.circle("line", tank.x, tank.y, tank.radius)
+
     love.graphics.print("Points : " .. tostring(tank.points), 10, 10)
-    love.graphics.print("Bombs : " .. tostring(tank.bombs), 10, 40)
-    love.graphics.print("Bonus : " .. tostring(#tank.bonus), 10, 80)
-    --love.graphics.print("Shoot : " .. tostring(tank.shootTimer.restart) .. " - " .. tank.shootTimer.currentTime, 10, 80)
 end
 
 return tank
