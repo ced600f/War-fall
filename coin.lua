@@ -60,7 +60,7 @@ function drawCoins()
     end
 end
 
-function initCoins()
+function razCoins()
     for i = #coins, 1, -1 do
         table.remove(coins, i)
     end

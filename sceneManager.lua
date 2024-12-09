@@ -14,7 +14,7 @@ function newScene(title)
     scene.draw = function()
     end
 
-    scene.unLoad = function()
+    scene.unload = function()
     end
 
     scene.keypressed = function(key)
@@ -35,7 +35,7 @@ local currentScene = nil
 
 function changeScene(title, data)
     if currentScene then -- equivalent ~= nil
-        currentScene.unLoad()
+        currentScene.unload()
     end
     if scenes[title] then
         currentScene = scenes[title]

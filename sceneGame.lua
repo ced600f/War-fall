@@ -10,6 +10,10 @@ sceneGame.load = function(data)
     myGame.load()
 end
 
+sceneGame.unload = function()
+    myGame.unload()
+end
+
 sceneGame.update = function(dt)
     myGame.update(dt)
 end

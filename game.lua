@@ -48,7 +48,6 @@ end
 
 function Game.load()
     initObjects()
-    initBonus()
 
     tank.init()
 
@@ -93,6 +92,12 @@ function Game.load()
     newTimer(15, 60, Game.addBonus)
     Game.Music:stop()
     Game.Music:play()
+end
+
+function Game.unload()
+    razBonus()
+    razTimers()
+    razCoins()
 end
 
 function Game.update(dt)

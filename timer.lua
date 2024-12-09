@@ -58,3 +58,9 @@ function newTimer(delayMin, delayMax, callback, restart)
 
     return timer
 end
+
+function razTimers()
+    for i = #timers, 1, -1 do
+        table.remove(timers, i)
+    end
+end

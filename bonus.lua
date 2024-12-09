@@ -61,7 +61,7 @@ function drawBonus()
     end
 end
 
-function initBonus()
+function razBonus()
     for i = #bonus, 1, -1 do
         table.remove(bonus, i)
     end
