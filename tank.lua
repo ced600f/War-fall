@@ -40,7 +40,7 @@ tank.init = function()
     tank.bombs = 0
     tank.bonus = {}
     tank.shieldImage = love.graphics.newImage("images/shield.png")
-
+    tank.shootTimer = newTimer(0.3, 0.3, tank.shootTick, false)
     tank.hurtSound = love.audio.newSource("Sons/TankHurt.wav", "static")
     tank.fallingSound = love.audio.newSource("Sons/TankFalling.wav", "static")
 end
@@ -80,8 +80,6 @@ tank.fall = function(dt)
         changeScene("GameOver")
     end
 end
-
-tank.shootTimer = newTimer(0.3, 0.3, tank.shootTick, false)
 
 tank.isBonusPresent = function(b)
     local bRetour = false
